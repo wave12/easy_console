@@ -44,7 +44,9 @@ easy_console/
 ./env_setup.sh
 
 ## 3. 构建命令
+
 进入项目根目录，执行以下命令：
+```bash
 mkdir build
 cd build
 cmake ..
