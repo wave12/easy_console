@@ -22,15 +22,18 @@ EasyConsole 是一个轻量级的服务器监控 Agent，支持采集 CPU、内�
 ```bash
 chmod +x install_from_docker.sh
 ./install_from_docker.sh
+```
 (脚本会自动构建/拉取镜像、生成配置文件、并启动后台容器。运行完成后，可通过 docker logs -f easy_console 查看运行状态)
+
 
 ### 方式二：源码编译安装（推荐给开发者或内网环境）
 
 如果你需要二次开发，或服务器没有 Docker，可使用此方式。项目已内置所有源码依赖，支持离线构建：
 
-bash
+```bash
 chmod +x install_from_source.sh
 ./install_from_source.sh
+```
 (脚本会自动编译 Paho 库并安装到系统，随后编译主项目。生成的二进制文件位于 build/easy_console)
 
 ⚙️ 配置文件说明
@@ -38,11 +41,12 @@ chmod +x install_from_source.sh
 
 复制根目录下的配置模板文件：
 
-bash
+```bash
 cp config.example.json config.json
+```
 编辑 config.json 填入你的信息：
 
-json
+```json
 {   
     "decimal_places": 2,
     "sender_type": "mqtt",
@@ -54,6 +58,7 @@ json
     "mqtt_client_prefix": "easy_console_",
     ...
 }
+```
 (注：sender_type 可选 "mqtt" 或 "http")
 
 修改配置后，重启服务生效：
@@ -102,5 +107,5 @@ easy_console/
     └── httpServer.py       # 测试用 HTTP 接收端
 ```
 
-📄 开源许可证
+## 📄 开源许可证
 本项目采用 AGPL-3.0 许可证开源。
