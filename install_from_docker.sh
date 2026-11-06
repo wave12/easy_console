@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 开始通过 Docker 部署 EasyConsole..."
+echo "🚀 开始通过 Docker 部署 easy_console..."
 
 # 1. 检查 Docker
 if ! command -v docker &> /dev/null; then
