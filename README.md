@@ -67,7 +67,7 @@ Docker 方式：docker restart easy_console
 
 源码方式：结束进程后重新运行 ./build/easy_console
 
-## 1. 程序结构
+## 📦 程序结构
 
 ```text
 easy_console/
