@@ -8,3 +8,6 @@ config.json
 *.deb
 *.tar
 *.tar.gz
+
+# 发布目录
+release/

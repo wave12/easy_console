@@ -3,7 +3,6 @@
 #include <memory>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#define SSL_get1_peer_certificate SSL_get_peer_certificate
 #include "httplib.h"
 
 HttpSender::HttpSender(const std::string& url) : url_(url), port_(80) {
