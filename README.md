@@ -45,7 +45,14 @@ easy_console/
 ./env_setup.sh
 ```
 
-## 3. 构建命令
+## 3. 准备配置文件
+
+需要先配置相关参数。复制根目录下的配置模板文件：
+```bash
+cp config.example.json config.json
+```
+
+## 4. 构建命令
 
 进入项目根目录，执行以下命令：
 ```bash
