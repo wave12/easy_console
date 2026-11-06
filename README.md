@@ -2,62 +2,105 @@
 
 开源服务器监控与远程管控控制台 (Open-source server monitoring and remote management console)
 
+EasyConsole 是一个轻量级的服务器监控 Agent，支持采集 CPU、内存、磁盘、进程等指标，并通过 MQTT 或 HTTP 协议上报。项目内置了所有第三方依赖库，支持一键 Docker 部署和源码离线编译。
+
+## ✨ 核心特性
+
+- **多协议支持**：同时支持 HTTP 和 MQTT 上报。
+- **开箱即用**：第三方依赖（Paho MQTT、JSON、HTTPLib）全部内置（Vendored），无需联网下载外网库，彻底告别环境配置地狱。
+- **多部署方式**：提供 Docker 一键部署（适合普通用户）与源码编译安装（适合开发者/定制）。
+- **多平台支持**：完美兼容 Linux 环境。
+
+## 🚀 快速开始
+
+我们提供两种部署方式，请根据您的需求选择：
+
+### 方式一：Docker 一键部署（推荐给普通用户）
+
+无需配置任何 C++ 环境，只需确保服务器已安装 Docker。在项目根目录下执行：
+
+```bash
+chmod +x install_from_docker.sh
+./install_from_docker.sh
+(脚本会自动构建/拉取镜像、生成配置文件、并启动后台容器。运行完成后，可通过 docker logs -f easy_console 查看运行状态)
+
+### 方式二：源码编译安装（推荐给开发者或内网环境）
+
+如果你需要二次开发，或服务器没有 Docker，可使用此方式。项目已内置所有源码依赖，支持离线构建：
+
+bash
+chmod +x install_from_source.sh
+./install_from_source.sh
+(脚本会自动编译 Paho 库并安装到系统，随后编译主项目。生成的二进制文件位于 build/easy_console)
+
+⚙️ 配置文件说明
+无论使用哪种方式，在首次启动前，你都需要准备配置文件：
+
+复制根目录下的配置模板文件：
+
+bash
+cp config.example.json config.json
+编辑 config.json 填入你的信息：
+
+json
+{   
+    "decimal_places": 2,
+    "sender_type": "mqtt",
+    "server_url": "http://127.0.0.1:5567",                
+    "mqtt_broker": "tcp://127.0.0.1:1883",
+    "mqtt_username": "YOUR_USERNAME",
+    "mqtt_password": "YOUR_PASSWORD",
+    "mqtt_topic": "monitor/agent/metrics",
+    "mqtt_client_prefix": "easy_console_",
+    ...
+}
+(注：sender_type 可选 "mqtt" 或 "http")
+
+修改配置后，重启服务生效：
+
+Docker 方式：docker restart easy_console
+
+源码方式：结束进程后重新运行 ./build/easy_console
+
 ## 1. 程序结构
 
 ```text
 easy_console/
-├── CMakeLists.txt         # 构建配置文件
-├── README.md
-├── config.json            # 配置文件
-├── env_setup.sh           # 环境安装脚本
-├── install_service.sh     # systemd 服务安装脚本
-├── uninstall_service.sh   # systemd 服务卸载脚本
-├── include/
+├── CMakeLists.txt          # CMake 构建配置文件
+├── README.md               # 项目说明文档
+├── config.example.json     # 配置示例文件模板
+├── install_from_docker.sh  # Docker 一键部署脚本 (普通用户)
+├── install_from_source.sh  # 源码一键编译脚本 (开发者)
+├── install_service.sh      # systemd 服务安装脚本
+├── uninstall_service.sh    # systemd 服务卸载脚本
+├── LICENSE                 # 开源许可证 (AGPL-3.0)
+├── include/                # 核心头文件
 │   ├── models/
-│   │   └── MetricData.h   # 数据结构定义
+│   │   └── MetricData.h    # 数据结构定义
 │   ├── config/
-│   │   └── GlobalConfig.h # 全局配置类
+│   │   └── GlobalConfig.h  # 全局配置类
 │   ├── collectors/
-│   │   ├── ICollector.h   # 采集器基类接口
-│   │   └── CollectorFactory.h # 工厂类，用于跨平台实例化
+│   │   ├── ICollector.h    # 采集器基类接口
+│   │   └── CollectorFactory.h # 工厂类
 │   └── sender/
-│       ├── ISender.h      # 上报器基类接口
-│       └── HttpSender.h   # HTTP 上报器接口
-├── src/
-│   ├── main.cpp           # 主线程调度
+│       ├── ISender.h       # 上报器基类接口
+│       └── HttpSender.h    # HTTP 上报器接口
+├── src/                    # 核心源代码
+│   ├── main.cpp            # 主线程调度
 │   ├── collectors/
 │   │   ├── LinuxCollector.cpp # Linux 平台实现
-│   │   └── WindowsCollector.cpp # Windows 平台实现
+│   │   └── WindowsCollector.cpp # Windows 平台实现 (开发中)
 │   └── sender/
 │       ├── HttpSender.cpp
-│       └── MqttSender.cpp # 预留
-├── third_party/
-│   ├── nlohmann/json.hpp  # 引入 JSON 库（单头文件）
-│   └── httplib.h          # 引入 HTTP 库（单头文件）
+│       └── MqttSender.cpp
+├── third_party/            # 第三方依赖库 (内置，无需单独下载)
+│   ├── nlohmann/json.hpp   # JSON 解析库
+│   ├── httplib.h           # HTTP 客户端库
+│   ├── paho.mqtt.c/        # Paho MQTT C 源码
+│   └── paho.mqtt.cpp/      # Paho MQTT C++ 源码
 └── test/
-    └── httpServer.py      # 测试 HTTP 服务器接口
+    └── httpServer.py       # 测试用 HTTP 接收端
 ```
 
-## 2. 环境安装
-
-执行 env_setup.sh 脚本安装依赖库：
-```bash
-./env_setup.sh
-```
-
-## 3. 准备配置文件
-
-需要先配置相关参数。复制根目录下的配置模板文件：
-```bash
-cp config.example.json config.json
-```
-
-## 4. 构建命令
-
-进入项目根目录，执行以下命令：
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
+📄 开源许可证
+本项目采用 AGPL-3.0 许可证开源。
