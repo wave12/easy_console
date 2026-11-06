@@ -1,4 +1,4 @@
-# EasyConsole
+# easy_console
 
 开源服务器监控与远程管控控制台 (Open-source server monitoring and remote management console)
 
@@ -41,7 +41,9 @@ easy_console/
 ## 2. 环境安装
 
 执行 env_setup.sh 脚本安装依赖库：
+```bash
 ./env_setup.sh
+```
 
 ## 3. 构建命令
 
@@ -51,3 +53,4 @@ mkdir build
 cd build
 cmake ..
 make
+```
