@@ -1,0 +1,3 @@
+/home/sg/easy_console/build/CMakeFiles/rebuild_cache.dir
+/home/sg/easy_console/build/CMakeFiles/edit_cache.dir
+/home/sg/easy_console/build/CMakeFiles/easy_console.dir

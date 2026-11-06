@@ -1,0 +1,23 @@
+{
+    "decimal_places": 2,
+    "sender_type": "mqtt",
+    "server_url": "http://127.0.0.1:5567",                
+    "mqtt_broker": "tcp://127.0.0.1:1883",
+    "mqtt_username": "nuolong",
+    "mqtt_password": "nl@12345",
+    "mqtt_topic": "monitor/agent/metrics",
+    "mqtt_client_prefix": "nl_monitor_",
+    "disk_mount_points": [
+        "/",
+        "/data",
+        "/var/log",
+        "/mnt/nfs_share",
+        "/home"
+    ],
+    "monitor_processes": [
+        "mysqld",
+        "java",
+        "webrtc-streamer",
+        "test"
+    ]
+}
