@@ -36,8 +36,10 @@ easy_console/
 │   └── httplib.h          # 引入 HTTP 库（单头文件）
 └── test/
     └── httpServer.py      # 测试 HTTP 服务器接口
+```
 
 ## 2. 环境安装
+
 执行 env_setup.sh 脚本安装依赖库：
 ./env_setup.sh
 
