@@ -6,7 +6,7 @@
     "mqtt_username": "YOUR_USERNAME",
     "mqtt_password": "YOUR_PASSWORD",
     "mqtt_topic": "monitor/agent/metrics",
-    "mqtt_client_prefix": "nl_monitor_",
+    "mqtt_client_prefix": "easy_console_",
     "disk_mount_points": [
         "/",
         "/data",
