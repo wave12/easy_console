@@ -102,6 +102,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Threads::Threads 
     ${PLATFORM_LIBS}
     PahoMqttCpp::paho-mqttpp3
+    OpenSSL::SSL      
+    OpenSSL::Crypto   
 )
 
 # ---------------------------------------------------------

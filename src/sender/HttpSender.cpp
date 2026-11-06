@@ -1,5 +1,9 @@
 #include "sender/HttpSender.h"
 #include <iostream>
+#include <memory>
+
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#define SSL_get1_peer_certificate SSL_get_peer_certificate
 #include "httplib.h"
 
 HttpSender::HttpSender(const std::string& url) : url_(url), port_(80) {
@@ -27,17 +31,30 @@ void HttpSender::parseUrl() {
 bool HttpSender::send(const std::string& json_payload) {
     if (host_.empty()) return false;
 
-    httplib::Client cli(host_, port_);
-    // 设置超时防止阻塞主循环
-    cli.set_connection_timeout(3, 0); 
-    cli.set_read_timeout(5, 0);
-
-    auto res = cli.Post("/api/metrics", json_payload, "application/json");
+    httplib::Result res;
+    
+    if (host_.rfind("https://", 0) == 0 || port_ == 443) {
+        std::string domain = host_;
+        if (domain.rfind("https://", 0) == 0) domain = domain.substr(8);
+        
+        httplib::SSLClient cli(domain, port_);
+        cli.set_connection_timeout(3, 0);
+        cli.set_read_timeout(5, 0);
+        res = cli.Post("/api/metrics", json_payload, "application/json");
+    } else {
+        std::string domain = host_;
+        if (domain.rfind("http://", 0) == 0) domain = domain.substr(7);
+        
+        httplib::Client cli(domain, port_);
+        cli.set_connection_timeout(3, 0);
+        cli.set_read_timeout(5, 0);
+        res = cli.Post("/api/metrics", json_payload, "application/json");
+    }
 
     if (res && res->status == 200) {
         return true;
     } else {
-        std::cerr << "HTTP send failed. Status: " 
+        std::cerr << "HTTP/HTTPS send failed. Status: " 
                   << (res ? std::to_string(res->status) : "Connection error") << std::endl;
         return false;
     }

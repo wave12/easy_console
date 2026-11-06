@@ -65,7 +65,11 @@ if [[ "$(docker images -q wave12/easy_console:latest 2> /dev/null)" == "" ]]; th
     docker build -t wave12/easy_console:latest .
 fi
 
-# 3. 拉取镜像并运行
+if [ "$(docker ps -aq -f name=^/easy_console$)" ]; then
+    echo "🧹 检测到旧容器，正在清理..."
+    docker rm -f easy_console
+fi
+
 echo "📦 正在启动容器..."
 docker run -d --name easy_console --network host \
   -v $(pwd)/config.json:/app/config.json \

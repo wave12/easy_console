@@ -2,7 +2,7 @@
 
 开源服务器监控与远程管控控制台 (Open-source server monitoring and remote management console)
 
-EasyConsole 是一个轻量级的服务器监控 Agent，支持采集 CPU、内存、磁盘、进程等指标，并通过 MQTT 或 HTTP 协议上报。项目内置了所有第三方依赖库，支持一键 Docker 部署和源码离线编译。
+easy_console 是一个轻量级的服务器监控 Agent，支持采集 CPU、内存、磁盘、进程等指标，并通过 MQTT 或 HTTP 协议上报。项目内置了所有第三方依赖库，支持一键 Docker 部署和源码离线编译。
 
 ## ✨ 核心特性
 

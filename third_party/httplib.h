@@ -499,7 +499,7 @@ using socket_t = int;
 #endif
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #elif OPENSSL_VERSION_NUMBER < 0x30000000L
-#error Sorry, OpenSSL versions prior to 3.0.0 are not supported
+//#error Sorry, OpenSSL versions prior to 3.0.0 are not supported
 #endif
 
 #endif // CPPHTTPLIB_OPENSSL_SUPPORT
