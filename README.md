@@ -37,11 +37,11 @@ easy_console/
 └── test/
     └── httpServer.py      # 测试 HTTP 服务器接口
 
-2、环境安装
+## 2. 环境安装
 执行 env_setup.sh 脚本安装依赖库：
 ./env_setup.sh
 
-3、构建命令
+## 3. 构建命令
 进入项目根目录，执行以下命令：
 mkdir build
 cd build
