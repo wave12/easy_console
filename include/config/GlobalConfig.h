@@ -9,6 +9,11 @@ public:
         return instance;
     }
 
+    std::string agent_token = "";
+    std::string node_name = "";
+
+    int collect_interval = 30;
+
     // 小数保留位数，默认 2 位
     std::atomic<int> decimal_places{2};
     std::string sender_type{"http"};

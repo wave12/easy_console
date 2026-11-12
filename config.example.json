@@ -1,4 +1,7 @@
 {
+    "agent_token": "云平台token",    
+    "node_name": "Web_Server_01",
+    "collect_interval": 600,
     "decimal_places": 2,
     "sender_type": "mqtt",
     "server_url": "http://127.0.0.1:5567",                

@@ -42,6 +42,13 @@ void loadConfig(const std::string& path) {
         
         auto& gc = GlobalConfig::getInstance();
 
+        if (config.contains("collect_interval")) {
+            gc.collect_interval = config["collect_interval"].get<int>();
+            if (gc.collect_interval <= 0) gc.collect_interval = 30; // 防止填错变负数
+        }
+
+        if (config.contains("agent_token")) gc.agent_token = config["agent_token"].get<std::string>();
+        if (config.contains("node_name")) gc.node_name = config["node_name"].get<std::string>();
         if (config.contains("decimal_places")) gc.decimal_places.store(config["decimal_places"].get<int>());
         if (config.contains("sender_type")) gc.sender_type = config["sender_type"].get<std::string>();
         if (config.contains("server_url")) gc.server_url = config["server_url"].get<std::string>();
@@ -115,15 +122,15 @@ int main() {
     CpuMetric dummy;
     collector->collectCPU(dummy); 
 
-    const int COLLECT_INTERVAL_SEC = 5; // 采集间隔，设为 5 秒
-    std::cout << "Monitor Agent started. Collecting every " << COLLECT_INTERVAL_SEC << " seconds." << std::endl;
+    int collect_interval_sec = gc.collect_interval; // 采集间隔 
+    std::cout << "Monitor Agent started. Collecting every " << collect_interval_sec << " seconds." << std::endl;
 
     // 根据配置决定实例化哪个发送器
     std::unique_ptr<ISender> sender;
     if (gc.sender_type == "mqtt") {
         sender = std::make_unique<MqttSender>(gc.mqtt_broker, gc.mqtt_client_prefix, gc.mqtt_topic, gc.mqtt_username, gc.mqtt_password);
     } else {
-        sender = std::make_unique<HttpSender>(gc.server_url);
+        sender = std::make_unique<HttpSender>(gc.server_url, gc.agent_token);
     }
 
     while (g_running) {
@@ -139,8 +146,9 @@ int main() {
         // 2. 转换为 JSON
         json j = metrics;
         j["time_str"] = getCurrentTimeString(); 
-        // 时间戳（秒级），方便服务端做时间范围查询
         j["timestamp"] = std::time(nullptr);
+        j["node_name"] = gc.node_name;
+        j["collect_interval"] = gc.collect_interval;
         
         // 生成无格式化的紧凑 JSON 字符串（减小网络传输体积）
         std::string payload = j.dump(); 
@@ -155,7 +163,7 @@ int main() {
         auto end_time = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();
         
-        int sleep_time = COLLECT_INTERVAL_SEC - elapsed;
+        int sleep_time = collect_interval_sec - elapsed;
         if (sleep_time > 0) {
             // 将休眠时间分片，每 100 毫秒检查一次 g_running 标志
             // 这样当你按 Ctrl+C 时，程序能瞬间响应，不用等 5 秒休眠结束

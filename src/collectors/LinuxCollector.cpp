@@ -12,12 +12,21 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <unistd.h>
 
 class LinuxCollector : public ICollector {
 private:
     // 用于计算 CPU 使用率的静态变量（保存上一次的值）
     unsigned long long last_total_user = 0, last_total_user_low = 0;
     unsigned long long last_total_sys = 0, last_total_idle = 0;
+
+    std::string getProcPath() {
+        // 如果存在 /host/proc 并且程序运行在 Docker 里，就用 /host/proc
+        if (access("/host/proc", F_OK) == 0 && access("/.dockerenv", F_OK) == 0) {
+            return "/host/proc";
+        }
+        return "/proc";
+    }
 
     // 辅助函数：解析 /proc/[pid]/stat 文件，提取进程名和内存信息
     ProcessMetric getProcessMetric(int pid) {
@@ -145,23 +154,24 @@ public:
         out.clear();
         
         const auto& target_names = GlobalConfig::getInstance().monitor_processes;
-        
-        // 1. 初始化结果集：先假设所有配置的进程都没运行
+        if (target_names.empty()) return;
+
         std::map<std::string, ProcessMetric> result_map;
         for (const auto& name : target_names) {
             ProcessMetric p;
             p.name = name;
-            p.pid = -1; // 未运行的进程 PID 设为 -1
+            p.pid = -1;
             p.cpu_usage = 0.0;
             p.mem_usage = 0.0;
             p.is_running = false;
             result_map[name] = p;
         }
     
-        if (target_names.empty()) return; // 没配就不扫
-    
-        // 2. 遍历 /proc 寻找匹配的进程
-        DIR* dir = opendir("/proc");
+        // 👇 获取真实的 proc 路径
+        std::string proc_base = getProcPath();
+        std::string proc_dir_path = proc_base + "/";
+
+        DIR* dir = opendir(proc_dir_path.c_str());
         if (!dir) return;
     
         struct dirent* entry;
@@ -169,48 +179,40 @@ public:
             if (entry->d_type == DT_DIR && isdigit(entry->d_name[0])) {
                 int pid = std::stoi(entry->d_name);
                 
-                std::string stat_path = "/proc/" + std::to_string(pid) + "/stat";
+                // 👇 替换为 proc_base
+                std::string stat_path = proc_base + "/" + std::to_string(pid) + "/stat";
                 std::ifstream stat_file(stat_path);
                 if (!stat_file.is_open()) continue;
     
                 std::string line;
                 std::getline(stat_file, line);
                 
-                // 提取进程名 (在括号内)
                 size_t left_paren = line.find('(');
                 size_t right_paren = line.rfind(')');
                 if (left_paren != std::string::npos && right_paren != std::string::npos) {
                     std::string proc_name = line.substr(left_paren + 1, right_paren - left_paren - 1);
                     
-                    // 如果这个进程名在我们配置的监控列表里
                     if (result_map.find(proc_name) != result_map.end()) {
-                        // 标记为运行中
                         result_map[proc_name].is_running = true;
                         
-                        // 如果同名进程有多个，记录第一个找到的 PID 即可，或者记录 -2 表示有多个
                         if (result_map[proc_name].pid == -1) {
                             result_map[proc_name].pid = pid;
                         }
     
-                        // 获取物理内存 (statm)
-                        std::string statm_path = "/proc/" + std::to_string(pid) + "/statm";
+                        // 👇 替换为 proc_base
+                        std::string statm_path = proc_base + "/" + std::to_string(pid) + "/statm";
                         std::ifstream statm_file(statm_path);
                         if (statm_file.is_open()) {
                             long size, resident;
                             statm_file >> size >> resident;
-                            // 累加内存占用 (MB)
                             result_map[proc_name].mem_usage += (resident * 4096.0) / (1024.0 * 1024.0);
                         }
-    
-                        // 获取 CPU 时间 (暂不细化单进程 CPU 百分比，前面讨论过开销大，这里仅保留占位)
-                        // 如果一定要算，需要将 utime+stime 记录并在全局维护上一次的值
                     }
                 }
             }
         }
         closedir(dir);
     
-        // 3. 将结果转换为 vector 输出
         for (const auto& pair : result_map) {
             out.push_back(pair.second);
         }

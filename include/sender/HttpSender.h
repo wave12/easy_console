@@ -5,7 +5,7 @@
 class HttpSender : public ISender {
 public:
     // 构造时传入 URL，或者直接根据配置解析
-    explicit HttpSender(const std::string& url);
+    explicit HttpSender(const std::string& url, const std::string& agent_token = "");
     
     bool send(const std::string& json_payload) override;
 
@@ -13,6 +13,8 @@ private:
     std::string url_;
     std::string host_;
     int port_;
+    std::string path_;
+    std::string agent_token_;
     
     void parseUrl(); // 辅助函数，解析 host 和 port
 };

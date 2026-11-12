@@ -36,8 +36,10 @@ fi
 # 5. 启动容器
 echo "📦 正在启动容器..."
 docker run -d --name easy_console --network host \
+  --pid=host \
+  -v /proc:/host/proc:ro \
   -v $(pwd)/config.json:/app/config.json \
-  wave12/easy_console:latest > /dev/null
+  wave12/easy_console:latest
 
 echo "✅ 启动成功！"
 echo "=========================================================="

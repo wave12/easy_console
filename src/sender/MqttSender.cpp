@@ -66,7 +66,11 @@ bool MqttSender::send(const std::string& json_payload) {
     }
 
     try {
-        auto msg = mqtt::make_message(topic_, json_payload);
+        nlohmann::json j = nlohmann::json::parse(json_payload);
+        //j["agent_token"] = agent_token_; // 假设你在类里存了这个变量
+        std::string final_payload = j.dump();
+        
+        auto msg = mqtt::make_message(topic_, final_payload);
         msg->set_qos(1);
         client_.publish(msg)->wait_for(std::chrono::seconds(5));
         return true;
