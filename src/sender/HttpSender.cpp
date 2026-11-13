@@ -72,10 +72,27 @@ bool HttpSender::send(const std::string& json_payload) {
     }
 
     if (res && res->status == 200) {
-        std::cout << "[DEBUG] 数据发送成功，状态码: " << res->status << std::endl;
-        // 如果想看成功时的返回，也可以打印：
-        // std::cout << "Response body: " << res->body << std::endl;
-        return true;
+        try {
+            // 尝试解析返回的 JSON 内容
+            auto j = nlohmann::json::parse(res->body);
+            
+            // 如果 JSON 里有 code 并且等于 200，才算是真正的成功
+            if (j.contains("code") && j["code"] == 200) {
+                std::cout << "[DEBUG] 数据发送成功" << std::endl;
+                return true;
+            } else {
+                // 如果云函数返回了 403 拦截
+                std::string msg = j.contains("msg") ? j["msg"].get<std::string>() : "未知业务错误";
+                int code = j.contains("code") ? j["code"].get<int>() : 0;
+                std::cerr << "[业务拦截] " << msg << " (业务码: " << code << ")" << std::endl;
+                return false;
+            }
+        } catch (const std::exception& e) {
+            // 如果解析失败，说明返回的可能不是标准 JSON（比如网关报错）
+            std::cerr << "[ERROR] 解析返回 JSON 失败: " << e.what() << std::endl;
+            std::cerr << "[原始返回内容] " << res->body << std::endl;
+            return false;
+        }
     } else {
         std::cerr << "HTTP/HTTPS send failed. Status: ";
         if (res) {
