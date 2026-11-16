@@ -35,7 +35,7 @@ fi
 
 # 5. 启动容器
 echo "📦 正在启动容器..."
-docker run -d --name easy_console --network host \
+docker run -d --name easy_console --restart=always --memory="512m" --network host \
   --pid=host \
   -v /proc:/host/proc:ro \
   -v $(pwd)/config.json:/app/config.json \
