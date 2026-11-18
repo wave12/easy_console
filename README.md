@@ -48,6 +48,9 @@ cp config.example.json config.json
 
 ```json
 {   
+    "agent_token": "云平台token",    
+    "node_name": "Web_Server_01",
+    "collect_interval": 600,
     "decimal_places": 2,
     "sender_type": "mqtt",
     "server_url": "http://127.0.0.1:5567",                
@@ -59,7 +62,18 @@ cp config.example.json config.json
     ...
 }
 ```
-(注：sender_type 可选 "mqtt" 或 "http")
+说明：
+1. agent_token 为云平台分配的唯一标识，用于认证和授权。
+2. node_name 为节点名称，用于标识该节点。
+3. collect_interval 为采集间隔，单位为秒，默认 600 秒。
+4. decimal_places 为小数位数，默认 2 位。
+5. sender_type 可选 "mqtt" 或 "http"，默认 "http"。
+6. server_url 为 HTTP 上报时必填，支持https协议，MQTT 上报时可选
+7. mqtt_broker 为 MQTT 上报时必填，HTTP 上报时可选
+8. mqtt_username 为 MQTT 上报时必填，HTTP 上报时可选
+9. mqtt_password 为 MQTT 上报时必填，HTTP 上报时可选
+10. mqtt_topic 为 MQTT 上报时必填，HTTP 上报时可选
+11. mqtt_client_prefix 为 MQTT 上报时必填，HTTP 上报时可选
 
 修改配置后，重启服务生效：
 
@@ -116,6 +130,7 @@ easy_console/
 1. 联系项目负责人注册账号。
 2. 在控制台获取您的专属 `Agent Token`。
 3. 将 Token 写入客户端的 `config.json` 中，即可在网页上实时查看监控数据。
+4. 云平台暂时只支持http上报，不支持mqtt上报。
 
 > **关于云平台使用**：目前云平台已上线，如需对接、开通高级权限或遇到问题，请联系项目负责人。
 
