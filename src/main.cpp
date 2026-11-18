@@ -123,6 +123,10 @@ int main() {
     collector->collectCPU(dummy); 
 
     int collect_interval_sec = gc.collect_interval; // 采集间隔 
+    // 限制采集间隔，不能小于60秒。监控行业建议60秒以上，避免对系统性能造成影响。
+    if (collect_interval_sec < 60) {
+        collect_interval_sec = 60;
+    }
     std::cout << "Monitor Agent started. Collecting every " << collect_interval_sec << " seconds." << std::endl;
 
     // 根据配置决定实例化哪个发送器
@@ -164,9 +168,9 @@ int main() {
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time).count();
         
         int sleep_time = collect_interval_sec - elapsed;
-        if (sleep_time > 0) {
-            // 将休眠时间分片，每 100 毫秒检查一次 g_running 标志
-            // 这样当你按 Ctrl+C 时，程序能瞬间响应，不用等 5 秒休眠结束
+        if (sleep_time > 0) {    
+            // 有剩余时间，等待剩余时间，比如间隔是100秒，每次采集耗时1秒，剩余99秒，即需要休眠99秒
+            // 将休眠时间分片，每 100 毫秒检查一次 g_running 标志，这样当你按 Ctrl+C 时，程序能瞬间响应，不用等 5 秒休眠结束
             for (int i = 0; i < sleep_time * 10 && g_running; ++i) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
